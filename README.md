@@ -1,9 +1,28 @@
 # Steps to get working after the first git clone
 
-Run the following commands in your terminal to set up a python virtual environment
+## First time setup
 
+Run the following command ONCE ONLY in your terminal to set up a python virtual environment:
+
+```
 python3 -m venv venv
+```
+
+## Before coding or running the app
+
+Then, every time before coding, run:
+
+```
 source venv/bin/activate
+```
+
+## To run the app
+
+```
+python gol.py
+```
+
+## Notes for later
 
 Later, we will need to add some things to manage dependencies
 
