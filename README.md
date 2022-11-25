@@ -1,3 +1,23 @@
+# Using git for version control
+
+## Getting the code
+
+```
+git clone https://github.com/logularjason/gol.git
+```
+
+## Making a commit
+
+```
+git commit -am "Describe the work you did"
+```
+
+## Sending the info to the internet (for sharing with Dad)
+
+```
+git push
+```
+
 # Steps to get working after the first git clone
 
 ## First time setup
@@ -30,3 +50,7 @@ Later, we will need to add some things to manage dependencies
 
 venv/bin/pip3 install pip-tools
 venv/bin/pip-compile -o requirements.txt requirements.in
+
+# Background reading
+
+Initial code that describes how to use Canvas is taken from https://tkdocs.com/tutorial/canvas.html
