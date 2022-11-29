@@ -21,10 +21,12 @@ def createCanvas(window):
 # Create a list of creatures
 def createCreatures(canvas, creatureCount):
     # This is a local variable containing an empty list
+    # Read up on lists and tuples; e.g. https://realpython.com/python-lists-tuples/
     creatures = []
     # Repeatedly create creatures
     for c in range(creatureCount):
         # Each creature is created with a different location and appended to our list
+        # See how it's possible to use '+' to append lists?
         creatures = creatures + [canvas.create_oval(c * 15 + 10 , 10, c * 15 + 20, 20, outline='red')]
     # Return the list to the caller
     return creatures
