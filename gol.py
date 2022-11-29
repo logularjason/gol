@@ -52,6 +52,8 @@ window = tk.Tk()
 canvas = createCanvas(window)
 
 # Create a list of creatures
+# LAURA: see if you can figure out how to give each creature a random starting location on the screen
+# Clue: read up on the function random() and use it for the x and y starting location
 creatures = createCreatures(canvas, 10)
 
 # Move the creatures
