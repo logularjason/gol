@@ -33,7 +33,7 @@ def createCreatures(canvas, creatureCount):
 
 # A function to move the list of creatures
 def moveCreatures(window, canvas, creatures):
-    movementCount = 20
+    movementCount = 50
     x, y = 5, 5
     # Move the creatures repeatedly
     while movementCount > 0:
