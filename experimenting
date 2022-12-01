@@ -1,0 +1,76 @@
+#greeting function 
+name = input("what is your name? ")
+print("hello " + name)
+
+#calculating age from birth year
+birth_year = input("what year were you born?")
+age = 2022 - int(birth_year)
+print("you must be " +  str(age))
+
+#adding two numbers
+first = input("First:")
+second = input("Second:")
+sum = float(first) + float(second)
+print("Sum: " + str(sum))
+
+
+#working with words
+course = 'Python for beginners'
+print (course.upper())
+print (course.find('t'))
+
+#working with numbers
+x = 3>2
+print(x)
+
+
+#using numbers in price
+price = 25 
+print(price > 10 and price < 30)
+
+price = 5
+print(price > 10 or price < 30)
+
+
+#if statements (to get out of indented press shift then tab- indented code is the only code that wont always run)
+value = input("what is the temperature today?")
+temperature = int(value)
+if temperature > 30 :
+    print("It's a hot day")
+    print("wear sunscreen!")
+elif temperature > 20 : #means (20, 30]
+    print("it's a nice day")
+elif temperature > 10 :
+    print("it's pretty cold")
+print("done")
+
+
+#calculating kg and Ibs from eachother 
+weight = input("what is your weight?")
+unit = input("is this in kgs or Ibs?")
+if unit == "kgs" :
+    pounds = 2.205 * int(weight)
+    print("you weigh " + str(pounds) + "pounds")
+elif unit == "Ibs" :
+    kilos = int(weight)/2.205
+    print("you weigh " + str(kilos) + "kilograms")
+
+#running a while loop 
+i = 1 
+while i<= 5 :
+    print(i)
+    i = i + 1
+print("done")
+
+i = 1 
+while i<= 5 :
+    print(i * '*')
+    i = i + 1
+print("done")
+
+
+animals = ["dog", "cat", "cow", "rat", "emu" ]
+print(animals[3])
+
+
+

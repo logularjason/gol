@@ -2,6 +2,7 @@
 # This library is described here: https://docs.python.org/3/library/tk.html
 import tkinter as tk
 import time
+import random 
 
 # A function containing the initialisation logic
 # We put this into a function to keep the code tidy
@@ -23,11 +24,13 @@ def createCreatures(canvas, creatureCount):
     # This is a local variable containing an empty list
     # Read up on lists and tuples; e.g. https://realpython.com/python-lists-tuples/
     creatures = []
-    # Repeatedly create creatures
+# Repeatedly create creatures
+# Each creature is created with a different location and appended to our list
+# See how it's possible to use '+' to append lists?
     for c in range(creatureCount):
-        # Each creature is created with a different location and appended to our list
-        # See how it's possible to use '+' to append lists?
-        creatures = creatures + [canvas.create_oval(c * 15 + 10 , 10, c * 15 + 20, 20, outline='red')]
+        x = random.randint(0, 1000)
+        y = random.randint(0, 1000)
+        creatures = creatures + [canvas.create_oval(x , y, x+10, y+10, outline='red')]
     # Return the list to the caller
     return creatures
 
