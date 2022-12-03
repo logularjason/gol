@@ -6,16 +6,25 @@ import random
 
 # a class to model a creature 
 class Creature:
+   
+    def updateMovecoordinates(self):
+        self.mx = random.randint(-5, 5)
+        self.my = random.randint(-5, 5)
+   
     def __init__(self, canvas):
         self.canvas = canvas
-        x = random.randint(0, 1000)
-        y = random.randint(0, 1000)
-        self.creature = canvas.create_oval(x , y, x+10, y+10, outline='red')
+        self.x = random.randint(0, 1000)
+        self.y = random.randint(0, 1000)
+        self.creature = canvas.create_oval(self.x , self.y, self.x+10, self.y+10, outline='red')
+        self.updateMovecoordinates()
 
     def move(self):
-        self.canvas.move(self.creature, 5, 5)
+        self.canvas.move(self.creature, self.mx, self.my)
+        self.x = self.x + self.mx
+        self.y = self.y + self.my
+        self.updateMovecoordinates()
 
-
+    
 
 # A function containing the initialisation logic
 # We put this into a function to keep the code tidy
