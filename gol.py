@@ -119,6 +119,21 @@ def moveCreatures(window, canvas, creatures):
         movementCount = movementCount - 1
         time.sleep(0.1)
 
+class Food:
+    def __init__(self, canvas):
+        self.canvas = canvas
+        self.x = random.randint(0, 1000)
+        self.y = random.randint(0, 1000)
+        self.food = canvas.create_rectangle(self.x, self.y, self.x+5, self.y+5, outline='green')
+
+class Foodlist:
+    def __init__(self, canvas):
+        self.canvas = canvas
+        self.foodlist = []
+        for c in range(15):
+            self.foodlist = self.foodlist + [Food(canvas)]
+
+
 # ==========================================
 # The script starts executing below
 # ==========================================
@@ -129,6 +144,6 @@ canvas = createCanvas(window)
 # LAURA: see if you can figure out how to give each creature a random starting location on the screen
 # Clue: read up on the function random() and use it for the x and y starting location
 creatures = createCreatures(canvas, 10)
-
+foodlist = Foodlist(canvas)
 # Move the creatures
 moveCreatures(window, canvas, creatures)
