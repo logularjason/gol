@@ -4,25 +4,69 @@ import tkinter as tk
 import time
 import random 
 
-# a class to model a creature 
+# A class to model the traits of a creature
+class DNA:
+
+    # Create new DNA.  We use the parent DNA if it is passed to the constructor
+    # Note that parentDna has a default of None if no argument is passed
+    def __init__(self, parentDna = None):
+        if parentDna is None:
+            self.hopDistance = random.randint(1, 20)
+        else:
+            self.hopDistance = parentDna.speed # Use the parent's DNA
+
+# Hold the energy of a creature and provide methods to calculate
+# changes to energy based on movement, etc.
+class Energy:
+
+    # Create new DNA
+    def __init__(self):
+        self.energy = 100
+
+    # Update our health based on move distance - moving has a cost
+    def updateEnergy(self, mx, my):
+        self.energy = self.energy - (mx + my)
+
+
+# A class to represent a creature 
 class Creature:
-   
-    def updateMovecoordinates(self):
-        self.mx = random.randint(-5, 5)
-        self.my = random.randint(-5, 5)
-   
+
+    # Constructor to create a new creature
     def __init__(self, canvas):
         self.canvas = canvas
         self.x = random.randint(0, 1000)
         self.y = random.randint(0, 1000)
+        self.dna = DNA()
+        self.energy = Energy()
         self.creature = canvas.create_oval(self.x , self.y, self.x+10, self.y+10, outline='red')
-        self.updateMovecoordinates()
+   
+    # Calculate our move vector based on our hopDistance
+    def calculateMoveVector(self):
+        self.mx = random.randint(-5, 5) * self.dna.hopDistance
+        self.my = random.randint(-5, 5) * self.dna.hopDistance
+        # Do not let the creature move out of bounds
+        if (self.mx > 999 or self.mx < 1):
+            self.mx = 0
+        if (self.my > 999 or self.my < 1):
+            self.my = 0
 
+    # Clean up when we die
+    def die(self):
+        self.canvas.delete(self.creature)
+
+    # Move and die if no energy left
     def move(self):
-        self.canvas.move(self.creature, self.mx, self.my)
-        self.x = self.x + self.mx
-        self.y = self.y + self.my
-        self.updateMovecoordinates()
+        self.calculateMoveVector()
+        self.energy.updateEnergy(self.mx, self.my)
+        # Move if we have enerty or die
+        if self.energy.energy > 0:
+            self.canvas.move(self.creature, self.mx, self.my)
+            self.x = self.x + self.mx
+            self.y = self.y + self.my
+            return True
+        else:
+            self.die()
+            return False
 
     
 
@@ -46,9 +90,9 @@ def createCreatures(canvas, creatureCount):
     # This is a local variable containing an empty list
     # Read up on lists and tuples; e.g. https://realpython.com/python-lists-tuples/
     creatures = []
-# Repeatedly create creatures
-# Each creature is created with a different location and appended to our list
-# See how it's possible to use '+' to append lists?
+    # Repeatedly create creatures
+    # Each creature is created with a different location and appended to our list
+    # See how it's possible to use '+' to append lists?
     for c in range(creatureCount):
         creatures = creatures + [Creature(canvas)]
     # Return the list to the caller
@@ -61,7 +105,9 @@ def moveCreatures(window, canvas, creatures):
     while movementCount > 0:
         # Move each creature
         for creature in creatures:
-            creature.move()
+            didMove = creature.move()
+            if didMove == False:
+                creatures.remove(creature)
         # Decrease counter and sleep
         window.update()
         movementCount = movementCount - 1
