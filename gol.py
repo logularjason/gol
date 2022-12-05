@@ -3,6 +3,8 @@
 import tkinter as tk
 import time
 import random 
+import math
+
 
 # A class to model the traits of a creature
 class DNA:
@@ -13,7 +15,7 @@ class DNA:
         if parentDna is None:
             self.hopDistance = random.randint(1, 20)
         else:
-            self.hopDistance = parentDna.speed # Use the parent's DNA
+            self.hopDistance = parentDna.hopDistance # Use the parent's DNA
 
 # Hold the energy of a creature and provide methods to calculate
 # changes to energy based on movement, etc.
@@ -25,7 +27,7 @@ class Energy:
 
     # Update our health based on move distance - moving has a cost
     def updateEnergy(self, mx, my):
-        self.energy = self.energy - (mx + my)
+        self.energy = self.energy - math.sqrt(mx*mx + my*my)
 
 
 # A class to represent a creature 
@@ -45,10 +47,14 @@ class Creature:
         self.mx = random.randint(-5, 5) * self.dna.hopDistance
         self.my = random.randint(-5, 5) * self.dna.hopDistance
         # Do not let the creature move out of bounds
-        if (self.mx > 999 or self.mx < 1):
-            self.mx = 0
-        if (self.my > 999 or self.my < 1):
-            self.my = 0
+        if (self.mx > 999):
+            mx = 999
+        if (self.mx < 1):
+            self.mx = 1
+        if (self.my > 999):
+            self.my = 999
+        if (self.my < 1):
+            self.my = 1
 
     # Clean up when we die
     def die(self):
@@ -106,7 +112,7 @@ def moveCreatures(window, canvas, creatures):
         # Move each creature
         for creature in creatures:
             didMove = creature.move()
-            if didMove == False:
+            if didMove is False:
                 creatures.remove(creature)
         # Decrease counter and sleep
         window.update()
