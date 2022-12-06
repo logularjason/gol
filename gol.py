@@ -48,7 +48,7 @@ class Creature:
         self.my = random.randint(-5, 5) * self.dna.hopDistance
         # Do not let the creature move out of bounds
         if (self.mx > 999):
-            mx = 999
+            self.mx = 999
         if (self.mx < 1):
             self.mx = 1
         if (self.my > 999):
@@ -124,7 +124,9 @@ class Food:
         self.canvas = canvas
         self.x = random.randint(0, 1000)
         self.y = random.randint(0, 1000)
+        self.energy = 50
         self.food = canvas.create_rectangle(self.x, self.y, self.x+5, self.y+5, outline='green')
+
 
 class Foodlist:
     def __init__(self, canvas):
