@@ -45,6 +45,7 @@ class Creature:
     # Calculate our move vector based on our hopDistance
     def calculateMoveVector(self, foodlist):
         # LAURA TBD - change this logic to move in the right direction
+        # as per my instructions.
         self.mx = random.randint(-5, 5) * self.dna.hopDistance
         self.my = random.randint(-5, 5) * self.dna.hopDistance
         # Do not let the creature move out of bounds
@@ -64,6 +65,9 @@ class Creature:
     # Move and die if no energy left
     def move(self, foodlist):
         self.calculateMoveVector(foodlist)
+        # LAURA TBD - logic below needs to be reworked based on my mail
+        # In short, you need to add the "eat" functionality for energy
+        # transfer and also cleaning up the food list
         self.energy.updateEnergy(self.mx, self.my)
         # Move if we have enerty or die
         if self.energy.energy > 0:
