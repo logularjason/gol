@@ -43,7 +43,8 @@ class Creature:
         self.creature = canvas.create_oval(self.x , self.y, self.x+10, self.y+10, outline='red')
    
     # Calculate our move vector based on our hopDistance
-    def calculateMoveVector(self):
+    def calculateMoveVector(self, foodlist):
+        # LAURA TBD - change this logic to move in the right direction
         self.mx = random.randint(-5, 5) * self.dna.hopDistance
         self.my = random.randint(-5, 5) * self.dna.hopDistance
         # Do not let the creature move out of bounds
@@ -61,8 +62,8 @@ class Creature:
         self.canvas.delete(self.creature)
 
     # Move and die if no energy left
-    def move(self):
-        self.calculateMoveVector()
+    def move(self, foodlist):
+        self.calculateMoveVector(foodlist)
         self.energy.updateEnergy(self.mx, self.my)
         # Move if we have enerty or die
         if self.energy.energy > 0:
@@ -74,6 +75,42 @@ class Creature:
             self.die()
             return False
 
+
+class Food:
+    def __init__(self, canvas):
+        self.canvas = canvas
+        self.x = random.randint(0, 1000)
+        self.y = random.randint(0, 1000)
+        self.energy = 50
+        self.food = canvas.create_rectangle(self.x, self.y, self.x+5, self.y+5, outline='green')
+
+    # return distance to creature
+    def distance(self, creature):
+        dx = self.x - creature.x
+        dy = self.y - creature.y
+        return math.sqrt(dx * dx + dy * dy)
+
+    def direction(self, creature):
+        dx = creature.x - self.x
+        dy = creature.y - self.y
+        return math.atan2(dy, dx)
+
+class Foodlist:
+    def __init__(self, canvas):
+        self.canvas = canvas
+        self.foodlist = []
+        for c in range(15):
+            self.foodlist = self.foodlist + [Food(canvas)]
+
+    def nearest(self, creature):
+        bestCreature = None
+        bestDistance = float('inf') # start with infinity - this is wierd syntax BTW
+        for food in foodlist:
+            d = food.distance(creature)
+            if (d < bestDistance):
+                bestDistance = d
+                bestCreature = creature
+        return bestCreature
     
 
 # A function containing the initialisation logic
@@ -105,13 +142,13 @@ def createCreatures(canvas, creatureCount):
     return creatures
 
 # A function to move the list of creatures
-def moveCreatures(window, canvas, creatures):
+def moveCreatures(window, canvas, creatures, foodlist):
     movementCount = 50
     # Move the creatures repeatedly
     while movementCount > 0:
         # Move each creature
         for creature in creatures:
-            didMove = creature.move()
+            didMove = creature.move(foodlist)
             if didMove is False:
                 creatures.remove(creature)
         # Decrease counter and sleep
@@ -119,21 +156,8 @@ def moveCreatures(window, canvas, creatures):
         movementCount = movementCount - 1
         time.sleep(0.1)
 
-class Food:
-    def __init__(self, canvas):
-        self.canvas = canvas
-        self.x = random.randint(0, 1000)
-        self.y = random.randint(0, 1000)
-        self.energy = 50
-        self.food = canvas.create_rectangle(self.x, self.y, self.x+5, self.y+5, outline='green')
+            
 
-
-class Foodlist:
-    def __init__(self, canvas):
-        self.canvas = canvas
-        self.foodlist = []
-        for c in range(15):
-            self.foodlist = self.foodlist + [Food(canvas)]
 
 
 # ==========================================
@@ -148,4 +172,4 @@ canvas = createCanvas(window)
 creatures = createCreatures(canvas, 10)
 foodlist = Foodlist(canvas)
 # Move the creatures
-moveCreatures(window, canvas, creatures)
+moveCreatures(window, canvas, creatures, foodlist)
