@@ -43,11 +43,16 @@ class Creature:
         self.creature = canvas.create_oval(self.x , self.y, self.x+10, self.y+10, outline='red')
    
     # Calculate our move vector based on our hopDistance
+    # Return whether the creature passed over the food
     def calculateMoveVector(self, foodlist):
         # LAURA TBD - change this logic to move in the right direction
         # as per my instructions.
-        self.mx = random.randint(-5, 5) * self.dna.hopDistance
-        self.my = random.randint(-5, 5) * self.dna.hopDistance
+        nearestFood = foodlist.nearest(self)
+        distance = nearestFood.distance(self)
+        direction = nearestFood.direction(self)
+        self.mx = self.dna.hopDistance * math.cos(direction)
+        self.my = self.dna.hopDistance * math.sin(direction)
+        
         # Do not let the creature move out of bounds
         if (self.mx > 999):
             self.mx = 999
@@ -58,13 +63,16 @@ class Creature:
         if (self.my < 1):
             self.my = 1
 
+        didHopOverFood = (self.dna.hopDistance >= distance)
+        return didHopOverFood
+
     # Clean up when we die
     def die(self):
         self.canvas.delete(self.creature)
 
     # Move and die if no energy left
     def move(self, foodlist):
-        self.calculateMoveVector(foodlist)
+        didHopOverFood = self.calculateMoveVector(foodlist)
         # LAURA TBD - logic below needs to be reworked based on my mail
         # In short, you need to add the "eat" functionality for energy
         # transfer and also cleaning up the food list
@@ -74,6 +82,14 @@ class Creature:
             self.canvas.move(self.creature, self.mx, self.my)
             self.x = self.x + self.mx
             self.y = self.y + self.my
+            # Laura TBD this is where we should call eat()
+            # I think we should implement the eat() method on foodlist like this:
+            # def eat(self, food, creature)
+            # The logic shoud do the following:
+            # - Add the food energy to the creature 
+            # - Delete the food instance from the foodlist
+            # Then, right here call the new method like this:
+            # foodlist.eat(food, self)
             return True
         else:
             self.die()
@@ -94,6 +110,7 @@ class Food:
         dy = self.y - creature.y
         return math.sqrt(dx * dx + dy * dy)
 
+    # return the direction of the food
     def direction(self, creature):
         dx = creature.x - self.x
         dy = creature.y - self.y
@@ -106,15 +123,16 @@ class Foodlist:
         for c in range(15):
             self.foodlist = self.foodlist + [Food(canvas)]
 
+    # Return the nearest food to the the supplied creature
     def nearest(self, creature):
-        bestCreature = None
+        bestFood = None
         bestDistance = float('inf') # start with infinity - this is wierd syntax BTW
         for food in foodlist:
             d = food.distance(creature)
             if (d < bestDistance):
                 bestDistance = d
-                bestCreature = creature
-        return bestCreature
+                bestFood = food
+        return bestFood
     
 
 # A function containing the initialisation logic
@@ -171,8 +189,6 @@ window = tk.Tk()
 canvas = createCanvas(window)
 
 # Create a list of creatures
-# LAURA: see if you can figure out how to give each creature a random starting location on the screen
-# Clue: read up on the function random() and use it for the x and y starting location
 creatures = createCreatures(canvas, 10)
 foodlist = Foodlist(canvas)
 # Move the creatures
