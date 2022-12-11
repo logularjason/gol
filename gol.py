@@ -82,6 +82,7 @@ class Creature:
             self.canvas.move(self.creature, self.mx, self.my)
             self.x = self.x + self.mx
             self.y = self.y + self.my
+
             # Laura TBD this is where we should call eat()
             # I think we should implement the eat() method on foodlist like this:
             # def eat(self, food, creature)
@@ -95,6 +96,11 @@ class Creature:
             self.die()
             return False
 
+    def eat(self, food, creature):
+       if self.x == creature.x and self.y == creature.y:
+            creature.energy = creature.energy + self.energy
+            list.remove(self)
+            
 
 class Food:
     def __init__(self, canvas):
