@@ -13,7 +13,7 @@ class DNA:
     # Note that parentDna has a default of None if no argument is passed
     def __init__(self, parentDna = None):
         if parentDna is None:
-            self.hopDistance = random.randint(1, 20)
+            self.hopDistance = random.randint(1, 50)
         else:
             self.hopDistance = parentDna.hopDistance # Use the parent's DNA
 
@@ -23,7 +23,7 @@ class Energy:
 
     # Create new DNA
     def __init__(self):
-        self.energy = 100
+        self.energy = 200
 
     # Update our health based on move distance - moving has a cost
     def updateEnergy(self, mx, my):
@@ -46,18 +46,21 @@ class Creature:
     # Return whether the creature passed over the food
     def calculateMoveVector(self, direction, distance):
         self.mx = self.dna.hopDistance * math.cos(direction)
-        self.my = self.dna.hopDistance * math.sin(direction)
-        
-        # Do not let the creature move out of bounds
-        if (self.mx > 999):
-            self.mx = 999
-        if (self.mx < 1):
-            self.mx = 1
-        if (self.my > 999):
-            self.my = 999
-        if (self.my < 1):
-            self.my = 1
+        self.my = -1.0 * self.dna.hopDistance * math.sin(direction)
 
+        # Limit mx and my to not let the creature move out of bounds
+        if (self.x + self.mx > 999):
+            self.mx = 999 - self.x
+        if (self.x + self.mx < 1):
+            self.mx = self.x - 1
+        if (self.y + self.my > 999):
+            self.my = 999 - self.y
+        if (self.y + self.my < 1):
+            self.my = self.y - 1
+
+        # Update our location
+        self.x = self.x + self.mx
+        self.y = self.y + self.my
         didHopOverFood = (self.dna.hopDistance >= distance)
         return didHopOverFood
 
@@ -71,33 +74,31 @@ class Creature:
         nearestFood = foodlist.nearest(self)
         distance = nearestFood.distance(self)
         direction = nearestFood.direction(self)
-        print("angle: ", direction)
         didHopOverFood = self.calculateMoveVector(direction, distance)
+        print('cx={} cy={} fx={} fy={} mx={} my={} angle={:2.2} energy={}'.format(self.x, self.y, nearestFood.x, nearestFood.y, self.mx, self.my, direction, self.energy.energy))
 
         self.energy.updateEnergy(self.mx, self.my)
 
         # Move if we have enerty or die
         if self.energy.energy > 0:
             self.canvas.move(self.creature, self.mx, self.my)
-            self.x = self.x + self.mx
-            self.y = self.y + self.my
             if (didHopOverFood is True):
-                self.eat(foodlist, nearestFood, self)
+                self.eat(foodlist, nearestFood)
             return True
         else:
             self.die()
             return False
 
-    def eat(self, foodlist, food, creature):
-        creature.energy = creature.energy + self.energy
-        self.energy = self.energy + food.energy
+    def eat(self, foodlist, food):
+        self.energy.energy = self.energy.energy + food.energy
         foodlist.remove(food)
+        
 class Food:
     def __init__(self, canvas):
         self.canvas = canvas
         self.x = random.randint(0, 1000)
         self.y = random.randint(0, 1000)
-        self.energy = 50
+        self.energy = 250
         self.food = canvas.create_rectangle(self.x, self.y, self.x+5, self.y+5, outline='green')
 
     # return distance to creature
@@ -108,9 +109,13 @@ class Food:
 
     # return the direction of the food
     def direction(self, creature):
-        dx = creature.x - self.x
+        dx = self.x - creature.x
         dy = creature.y - self.y
         return math.atan2(dy, dx)
+
+    # remove ourself from canvas
+    def remove(self):
+        self.canvas.delete(self.food)
 
 class Foodlist:
     def __init__(self, canvas):
@@ -129,6 +134,11 @@ class Foodlist:
                 bestDistance = d
                 bestFood = food
         return bestFood
+
+    # remove food from our list and also cavas
+    def remove(self, food):
+        food.remove()
+        self.foodlist.remove(food)
     
 
 # A function containing the initialisation logic
