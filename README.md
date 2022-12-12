@@ -22,11 +22,25 @@ git push
 
 ## First time setup
 
+Install python 3.10.9.  Later versions have trouble with OpenGL.
+
+https://www.python.org/downloads/release/python-3109/
+
 Run the following command ONCE ONLY in your terminal to set up a python virtual environment:
 
 ```
 python3 -m venv venv
 ```
+
+Then, install some libraries that are required:
+
+```
+pip install PyOpenGL PyOpenGL_accelerate
+```
+
+This did not work under windows - had to download whl files from here: https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyopengl
+
+See: https://stackoverflow.com/questions/65699670/pyopengl-opengl-error-nullfunctionerror-attempt-to-call-an-undefined-functio
 
 ## Before coding or running the app
 
@@ -35,6 +49,8 @@ Then, every time before coding, run:
 ```
 source venv/bin/activate
 ```
+
+
 
 ## To run the app
 
