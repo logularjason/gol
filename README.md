@@ -35,7 +35,7 @@ python3 -m venv venv
 Then, install some libraries that are required:
 
 ```
-pip install PyOpenGL PyOpenGL_accelerate
+pip install PyOpenGL PyOpenGL_accelerate pygame
 ```
 
 This did not work under windows - had to download whl files from here: https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyopengl
