@@ -92,7 +92,7 @@ class Creature:
 
     def eat(self, foodlist, food):
         self.energy.energy = self.energy.energy + food.energy
-        foodlist.remove(food)
+        foodlist.respawn(food)
         
 class Food:
     def __init__(self, screen):
@@ -117,11 +117,11 @@ class Food:
         return math.atan2(dy, dx)
 
 class Foodlist:
-    def __init__(self, screen):
+    def __init__(self, screen, creatures):
         self.screen = screen
+        self.creatures = creatures
         self.foodlist = []
-        for c in range(25):
-            self.foodlist = self.foodlist + [Food(screen)]
+        self.spawn()
 
     def draw(self):
         for food in self.foodlist:
@@ -138,10 +138,15 @@ class Foodlist:
                 bestFood = food
         return bestFood
 
-    # remove food from our list and also cavas
-    def remove(self, food):
+    # remove food from our list
+    def spawn(self):
+        for c in range(len(self.foodlist), len(self.creatures)):
+            self.foodlist = self.foodlist + [Food(self.screen)]
+
+    # remove food from our list
+    def respawn(self, food):
         self.foodlist.remove(food)
-    
+        self.spawn()
 
 # Create a list of creatures
 def createCreatures(screen, creatureCount):
@@ -167,7 +172,7 @@ def main():
     pg.display.set_caption("Lauras World")
     # Create a list of creatures
     creatures = createCreatures(screen, 20)
-    foodlist = Foodlist(screen)
+    foodlist = Foodlist(screen, creatures)
     # Move the creatures
     # moveCreatures(window, screen, creatures, foodlist)
 
