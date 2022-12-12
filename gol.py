@@ -1,7 +1,9 @@
-# The tkinter library allows us to use the screen
-# This library is described here: https://docs.python.org/3/library/tk.html
-import tkinter as tk
-import time
+# Using pygame for graphics.  See this tutorial:
+# https://www.pygame.org/docs/ref/draw.html
+import pygame as pg
+from pygame.locals import *
+from OpenGL.GL import *
+from OpenGL.GLU import *
 import random 
 import math
 
@@ -34,19 +36,23 @@ class Energy:
 class Creature:
 
     # Constructor to create a new creature
-    def __init__(self, canvas):
-        self.canvas = canvas
+    def __init__(self, screen):
+        self.screen = screen
         self.x = random.randint(0, 1000)
         self.y = random.randint(0, 1000)
         self.dna = DNA()
         self.energy = Energy()
-        self.creature = canvas.create_oval(self.x , self.y, self.x+10, self.y+10, outline='red')
+        self.draw()
    
+    def draw(self):
+        # area = pi * r ^ 2
+        pg.draw.circle(self.screen, "blue", [self.x, self.y], math.sqrt(self.energy.energy))
+
     # Calculate our move vector based on our hopDistance
     # Return whether the creature passed over the food
     def calculateMoveVector(self, direction, distance):
         self.mx = self.dna.hopDistance * math.cos(direction)
-        self.my = -1.0 * self.dna.hopDistance * math.sin(direction)
+        self.my = self.dna.hopDistance * math.sin(direction)
 
         # Limit mx and my to not let the creature move out of bounds
         if (self.x + self.mx > 999):
@@ -64,10 +70,6 @@ class Creature:
         didHopOverFood = (self.dna.hopDistance >= distance)
         return didHopOverFood
 
-    # Clean up when we die
-    def die(self):
-        self.canvas.delete(self.creature)
-
     # Move and die if no energy left
     def move(self, foodlist):
         # Get details of the food, direction, and whether we got the food
@@ -81,12 +83,11 @@ class Creature:
 
         # Move if we have enerty or die
         if self.energy.energy > 0:
-            self.canvas.move(self.creature, self.mx, self.my)
+            self.draw()
             if (didHopOverFood is True):
                 self.eat(foodlist, nearestFood)
             return True
         else:
-            self.die()
             return False
 
     def eat(self, foodlist, food):
@@ -94,12 +95,14 @@ class Creature:
         foodlist.remove(food)
         
 class Food:
-    def __init__(self, canvas):
-        self.canvas = canvas
+    def __init__(self, screen):
+        self.screen = screen
         self.x = random.randint(0, 1000)
         self.y = random.randint(0, 1000)
         self.energy = 250
-        self.food = canvas.create_rectangle(self.x, self.y, self.x+5, self.y+5, outline='green')
+
+    def draw(self):
+        pg.draw.rect(self.screen, "black", [self.x-2, self.y-2, 8, 8], 2) # left, top, width, height
 
     # return distance to creature
     def distance(self, creature):
@@ -110,19 +113,19 @@ class Food:
     # return the direction of the food
     def direction(self, creature):
         dx = self.x - creature.x
-        dy = creature.y - self.y
+        dy = self.y - creature.y
         return math.atan2(dy, dx)
 
-    # remove ourself from canvas
-    def remove(self):
-        self.canvas.delete(self.food)
-
 class Foodlist:
-    def __init__(self, canvas):
-        self.canvas = canvas
+    def __init__(self, screen):
+        self.screen = screen
         self.foodlist = []
-        for c in range(15):
-            self.foodlist = self.foodlist + [Food(canvas)]
+        for c in range(25):
+            self.foodlist = self.foodlist + [Food(screen)]
+
+    def draw(self):
+        for food in self.foodlist:
+            food.draw()
 
     # Return the nearest food to the the supplied creature
     def nearest(self, creature):
@@ -137,27 +140,11 @@ class Foodlist:
 
     # remove food from our list and also cavas
     def remove(self, food):
-        food.remove()
         self.foodlist.remove(food)
     
 
-# A function containing the initialisation logic
-# We put this into a function to keep the code tidy
-def createCanvas(window):
-    # Make the root window only have on column and row for placing child widgets
-    window.columnconfigure(0, weight=1)
-    window.rowconfigure(0, weight=1)
-    # Create a canvas
-    canvas = tk.Canvas(window, width=1000, height=1000)
-    # Place the canvas widget within the root window at row=0 and col=0
-    canvas.grid(column=0, row=0, sticky=(tk.N, tk.W, tk.E, tk.S))
-    # Draw a border around the canvas
-    # Creating items in tkinter is described here: https://tkdocs.com/tutorial/canvas.html#creating
-    canvas.create_rectangle(1, 1, 1000, 1000, outline='red')
-    return canvas
-
 # Create a list of creatures
-def createCreatures(canvas, creatureCount):
+def createCreatures(screen, creatureCount):
     # This is a local variable containing an empty list
     # Read up on lists and tuples; e.g. https://realpython.com/python-lists-tuples/
     creatures = []
@@ -165,33 +152,49 @@ def createCreatures(canvas, creatureCount):
     # Each creature is created with a different location and appended to our list
     # See how it's possible to use '+' to append lists?
     for c in range(creatureCount):
-        creatures = creatures + [Creature(canvas)]
+        creatures = creatures + [Creature(screen)]
     # Return the list to the caller
     return creatures
 
-# A function to move the list of creatures
-def moveCreatures(window, canvas, creatures, foodlist):
-    movementCount = 350
-    # Move the creatures repeatedly
-    while movementCount > 0:
+# ==========================================
+# This function runs the script
+# ==========================================
+def main():
+    pg.init()
+    # Set the height and width of the screen
+    size = [1000, 1000]
+    screen = pg.display.set_mode(size)
+    pg.display.set_caption("Lauras World")
+    # Create a list of creatures
+    creatures = createCreatures(screen, 20)
+    foodlist = Foodlist(screen)
+    # Move the creatures
+    # moveCreatures(window, screen, creatures, foodlist)
+
+    done = False
+    clock = pg.time.Clock()
+
+    while not done:
+        # This limits the while loop to a max of n times per second.
+        # Leave this out and we will use all CPU we can.
+        clock.tick(5)
+
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                done = True
+
+        screen.fill("white")
+        foodlist.draw()
         # Move each creature
         for creature in creatures:
             didMove = creature.move(foodlist)
             if didMove is False:
                 creatures.remove(creature)
-        # Decrease counter and sleep
-        window.update()
-        movementCount = movementCount - 1
-        time.sleep(0.2)
+        pg.display.flip()
 
-# ==========================================
-# The script starts executing below
-# ==========================================
-window = tk.Tk()
-canvas = createCanvas(window)
+    pg.quit()
+    quit()
 
-# Create a list of creatures
-creatures = createCreatures(canvas, 10)
-foodlist = Foodlist(canvas)
-# Move the creatures
-moveCreatures(window, canvas, creatures, foodlist)
+
+if __name__ == "__main__":
+    main()
