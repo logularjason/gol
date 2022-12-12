@@ -44,12 +44,7 @@ class Creature:
    
     # Calculate our move vector based on our hopDistance
     # Return whether the creature passed over the food
-    def calculateMoveVector(self, foodlist):
-        # LAURA TBD - change this logic to move in the right direction
-        # as per my instructions.
-        nearestFood = foodlist.nearest(self)
-        distance = nearestFood.distance(self)
-        direction = nearestFood.direction(self)
+    def calculateMoveVector(self, direction, distance):
         self.mx = self.dna.hopDistance * math.cos(direction)
         self.my = self.dna.hopDistance * math.sin(direction)
         
@@ -72,36 +67,31 @@ class Creature:
 
     # Move and die if no energy left
     def move(self, foodlist):
-        didHopOverFood = self.calculateMoveVector(foodlist)
-        # LAURA TBD - logic below needs to be reworked based on my mail
-        # In short, you need to add the "eat" functionality for energy
-        # transfer and also cleaning up the food list
+        # Get details of the food, direction, and whether we got the food
+        nearestFood = foodlist.nearest(self)
+        distance = nearestFood.distance(self)
+        direction = nearestFood.direction(self)
+        print("angle: ", direction)
+        didHopOverFood = self.calculateMoveVector(direction, distance)
+
         self.energy.updateEnergy(self.mx, self.my)
+
         # Move if we have enerty or die
         if self.energy.energy > 0:
             self.canvas.move(self.creature, self.mx, self.my)
             self.x = self.x + self.mx
             self.y = self.y + self.my
-
-            # Laura TBD this is where we should call eat()
-            # I think we should implement the eat() method on foodlist like this:
-            # def eat(self, food, creature)
-            # The logic shoud do the following:
-            # - Add the food energy to the creature 
-            # - Delete the food instance from the foodlist
-            # Then, right here call the new method like this:
-            # foodlist.eat(food, self)
+            if (didHopOverFood is True):
+                self.eat(foodlist, nearestFood, self)
             return True
         else:
             self.die()
             return False
 
-    def eat(self, food, creature):
-       if self.x == creature.x and self.y == creature.y:
-            creature.energy = creature.energy + self.energy
-            list.remove(self)
-            
-
+    def eat(self, foodlist, food, creature):
+        creature.energy = creature.energy + self.energy
+        self.energy = self.energy + food.energy
+        foodlist.remove(food)
 class Food:
     def __init__(self, canvas):
         self.canvas = canvas
@@ -133,7 +123,7 @@ class Foodlist:
     def nearest(self, creature):
         bestFood = None
         bestDistance = float('inf') # start with infinity - this is wierd syntax BTW
-        for food in foodlist:
+        for food in self.foodlist:
             d = food.distance(creature)
             if (d < bestDistance):
                 bestDistance = d
@@ -171,7 +161,7 @@ def createCreatures(canvas, creatureCount):
 
 # A function to move the list of creatures
 def moveCreatures(window, canvas, creatures, foodlist):
-    movementCount = 50
+    movementCount = 350
     # Move the creatures repeatedly
     while movementCount > 0:
         # Move each creature
@@ -182,11 +172,7 @@ def moveCreatures(window, canvas, creatures, foodlist):
         # Decrease counter and sleep
         window.update()
         movementCount = movementCount - 1
-        time.sleep(0.1)
-
-            
-
-
+        time.sleep(0.2)
 
 # ==========================================
 # The script starts executing below
