@@ -1,6 +1,7 @@
 import random 
 import math
 import pygame as pg
+from constants import *
 
 # A class to model the traits of a creature
 class DNA:
@@ -8,26 +9,42 @@ class DNA:
     # Create new DNA.  We use the parent DNA if it is passed to the constructor
     # Note that parentDna has a default of None if no argument is passed
     def __init__(self, parentDna = None):
-        hopDistance = random.randint(1, 100)
         if parentDna is None:
-            self.hopDistance = hopDistance
-            self.smell = 100 - hopDistance
+            self.generateDna()
         else:
-            fuzz = math.randint(-5, 5)
-            self.hopDistance = parentDna.hopDistance - fuzz # Use the parent's DNA
-            self.smell = parentDna.smell + fuzz
+            self.replicateDna(parentDna)
 
+    # generate DNA which totals to 100
+    # each gene is a fractionof this 100
+    def generateDna(self):
+        hopDistance = random.randint(MIN_GENE, MAX_GENE)
+        smell = random.randint(MIN_GENE, MAX_GENE)
+        stamina = random.randint(MIN_GENE, MAX_GENE)
+        normalise = 100 / (hopDistance + smell + stamina)
+        self.hopDistance = hopDistance * normalise
+        self.smell = smell * normalise
+        self.stamina = stamina * normalise
 
-    def colour(self):
-        return "blue"
+    # Add fuzz to each parent gene, then normalise back so that total is still 100
+    def replicateDna(self, parentDna):
+        hopDistance = parentDna.hopDistance + random.randint(-GENE_REPLICATION_FUZZ, GENE_REPLICATION_FUZZ)
+        smell = parentDna.smell + random.randint(-GENE_REPLICATION_FUZZ, GENE_REPLICATION_FUZZ)
+        stamina = parentDna.stamina + random.randint(-GENE_REPLICATION_FUZZ, GENE_REPLICATION_FUZZ)
+        normalise = 100 / (hopDistance + smell + stamina)
+        self.hopDistance = hopDistance * normalise
+        self.smell = smell * normalise
+        self.stamina = stamina * normalise
 
 # Hold the energy of a creature and provide methods to calculate
 # changes to energy based on movement, etc.
 class Energy:
 
-    # Create new DNA
-    def __init__(self, startEnergy):
-        self.energy = startEnergy
+    # Create new Energy
+    def __init__(self, suppliedEnergy = None):
+        if (suppliedEnergy is None):
+            self.energy = CREATURE_STARTING_ENERGY
+        else:
+            self.energy = suppliedEnergy
 
     # Update our health based on move distance - moving has a cost
     def updateEnergy(self, mx, my):
@@ -38,19 +55,47 @@ class Energy:
 class Creature:
 
     # Constructor to create a new creature
-    def __init__(self, screen, width, height, startEnergy):
+    def __init__(self, screen, parent = None):
         self.screen = screen
-        self.width = width
-        self.height = height
-        self.x = random.randint(0, width)
-        self.y = random.randint(0, height)
-        self.dna = DNA()
-        self.energy = Energy(startEnergy)
+        if (parent is None):
+            # Generate random properties
+            self.x = random.randint(0, SCREEN_WIDTH)
+            self.y = random.randint(0, SCREEN_HEIGHT)
+            self.dna = DNA()
+            self.energy = Energy()
+        else:
+            # Base our properties on the parent properties
+            self.dna = DNA(parent.dna)
+            self.energy = Energy(parent.energy.energy * ENERGY_SPLITTING_FACTOR)
+            self.x = parent.x + random.randint(CREATURE_REPLICATION_DISTANCE, CREATURE_REPLICATION_DISTANCE)
+            self.y = parent.y + random.randint(CREATURE_REPLICATION_DISTANCE, CREATURE_REPLICATION_DISTANCE)
         self.draw()
    
     def draw(self):
-        # area = pi * r ^ 2
-        pg.draw.circle(self.screen, self.dna.colour(), [self.x, self.y], math.sqrt(self.energy.energy))
+        colour = self.colour();
+        surface1 = pg.Surface((CREATURE_RADIUS,CREATURE_RADIUS))
+        surface1.set_colorkey("black")
+        surface1.set_alpha(colour.a)
+        pg.draw.circle(surface1, colour, [0, 0], CREATURE_RADIUS)
+        # pg.draw.circle(self.screen, colour, [self.x, self.y], CREATURE_RADIUS)
+        self.screen.blit(surface1, [self.x, self.y])
+
+    def colour(self):
+        red=self.calculateColorValue(self.dna.hopDistance)
+        green=self.calculateColorValue(self.dna.stamina)
+        blue=self.calculateColorValue(self.dna.smell)
+        opacity = int(self.energy.energy * ENERGY_OPACITY_FACTOR)
+        if (opacity > 255):
+            opacity = 255
+        print('r={} g={} b={} a={}'.format(red, green, blue, opacity))
+        return pg.Color(red, green, blue, opacity)
+
+    def calculateColorValue(self, gene):
+        value = (gene-NORMALISED_GENE_MIN) * 255 / NORMALISED_GENE_RANGE
+        if value < 0:
+            return 0
+        else:
+            return int(value)
 
     # Calculate our move vector based on our hopDistance
     # Return whether the creature passed over the food
@@ -59,12 +104,12 @@ class Creature:
         self.my = self.dna.hopDistance * math.sin(direction)
 
         # Limit mx and my to not let the creature move out of bounds
-        if (self.x + self.mx > self.width):
-            self.mx = self.width - self.x - 1
+        if (self.x + self.mx > SCREEN_WIDTH):
+            self.mx = SCREEN_WIDTH - self.x - 1
         if (self.x + self.mx < 1):
             self.mx = self.x - 1
-        if (self.y + self.my > self.height):
-            self.my = self.height - self.y - 1
+        if (self.y + self.my > SCREEN_HEIGHT):
+            self.my = SCREEN_HEIGHT - self.y - 1
         if (self.y + self.my < 1):
             self.my = self.y - 1
 
@@ -101,18 +146,12 @@ class Creature:
 class CreatureList:
 
     # Constructor to create a new creature
-    def __init__(self, screen, width, height, creatureCount, startEnergy):
+    def __init__(self, screen):
         self.screen = screen
-        self.width = width
-        self.height = height
-        self.creatureCount = creatureCount
-        self.startEnergy = startEnergy
         self.creatures = []
         # Repeatedly create creatures
-        # Each creature is created with a different location and appended to our list
-        # See how it's possible to use '+' to append lists?
-        for c in range(creatureCount):
-            self.creatures = self.creatures + [Creature(screen, self.width, self.height, self.startEnergy)]
+        for c in range(CREATURE_COUNT):
+            self.creatures = self.creatures + [Creature(screen)]
 
     def move(self, foodlist):
         # Move each creature
@@ -121,11 +160,10 @@ class CreatureList:
             if didMove is False:
                 self.creatures.remove(creature)
 
-    def replicate(self, threshold, energySplittingFactor):
+    def replicate(self):
         for creature in self.creatures:
-            if (creature.energy.energy >= threshold):
-                splitEnergy = creature.energy.energy * energySplittingFactor
+            if (creature.energy.energy >= REPLICATION_HEALTH_THRESHOLD):
+                splitEnergy = creature.energy.energy * ENERGY_SPLITTING_FACTOR
                 creature.energy.energy = splitEnergy
-                offspring = Creature(self.screen, self.width, self.height, splitEnergy)
-                offspring.dna = DNA(creature.dna)
+                offspring = Creature(self.screen, creature)
                 self.creatures.append(offspring)

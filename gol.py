@@ -3,17 +3,7 @@
 import pygame as pg
 from food import *
 from creature import *
-
-SCREEN_WIDTH=1200
-SCREEN_HEIGHT=800
-CREATURE_COUNT=40
-FRAMES_PER_SECOND=10 # how fast to run the main loop
-CREATURE_STARTING_ENERGY=1000 
-FOOD_ENERGY=75
-FOOD_CREATURE_FACTOR=1.5 # number of food = number of creatures * FOOD_CREATURE_FACTOR
-REPLICATION_HEALTH_THRESHOLD = CREATURE_STARTING_ENERGY * 2
-ENERGY_SPLITTING_FACTOR=0.5
-
+from constants import *
 
 # ==========================================
 # This function runs the script
@@ -24,12 +14,12 @@ def main():
     pg.init()
 
     # Set up the screen
-    screen = pg.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
-    pg.display.set_caption("Lauras World")
+    screen = pg.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT], 0, 32)
+    pg.display.set_caption("Lauras Game of Life")
 
     # Create a list of creatures
-    creatureList = CreatureList(screen, SCREEN_WIDTH, SCREEN_HEIGHT, CREATURE_COUNT, CREATURE_STARTING_ENERGY)
-    foodlist = Foodlist(screen, creatureList, FOOD_ENERGY, SCREEN_WIDTH, SCREEN_HEIGHT, FOOD_CREATURE_FACTOR)
+    creatureList = CreatureList(screen)
+    foodlist = Foodlist(screen, creatureList)
 
     # Flag that's used to exit the simulation loop below
     done = False
@@ -58,7 +48,7 @@ def main():
 
         # Laura TBD: add a replicate method to CreatureList and uncomment the line below to call it 
         # The logic should create another creature with new DNA that is the same as the parent
-        creatureList.replicate(REPLICATION_HEALTH_THRESHOLD, ENERGY_SPLITTING_FACTOR)
+        creatureList.replicate()
          
 
         # Tell pygame to swap its double-buffer (this paints the new frame)
