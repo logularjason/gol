@@ -1,6 +1,9 @@
 # Using pygame for graphics.  See this tutorial:
 # https://www.pygame.org/docs/ref/draw.html
 import pygame as pg
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 from food import *
 from creature import *
 from constants import *
@@ -27,6 +30,10 @@ def main():
     # A pygame clock that is used to limit frame rate
     clock = pg.time.Clock()
 
+    # A few helpers for plotting a histogram
+    i = 0
+    bins = range(0,101,2)
+
     while not done:
         # This limits the while loop to a max of n times per second.
         # Leave this out and we will use all CPU we can.
@@ -50,9 +57,20 @@ def main():
         # The logic should create another creature with new DNA that is the same as the parent
         creatureList.replicate()
          
-
         # Tell pygame to swap its double-buffer (this paints the new frame)
         pg.display.flip()
+
+        i = i + 1
+        i = i % 20
+        if (i is 1):
+            histograms = creatureList.dnaHistogram()
+            plt.clf()
+            plt.hist(histograms[0], bins, alpha=0.5, density=True, edgecolor='black', color='red', label='hop')
+            plt.hist(histograms[1], bins, alpha=0.5, density=True, edgecolor='black', color='green', label='smell')
+            plt.hist(histograms[2], bins, alpha=0.5, density=True, edgecolor='black', color='blue', label='stamina')
+            plt.legend(loc='upper right')
+            plt.pause(0.05)
+
 
     # Clean up when our loop completes
     pg.quit()

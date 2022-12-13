@@ -165,6 +165,7 @@ class CreatureList:
         for c in range(CREATURE_COUNT):
             self.creatures = self.creatures + [Creature(screen)]
 
+    # Move creatures including eating and death checks
     def move(self, foodlist):
         # Move each creature
         for creature in self.creatures:
@@ -172,6 +173,7 @@ class CreatureList:
             if didMove is False:
                 self.creatures.remove(creature)
 
+    # Replicate healthy creatures
     def replicate(self):
         for creature in self.creatures:
             if (creature.energy.energy >= REPLICATION_HEALTH_THRESHOLD):
@@ -179,3 +181,15 @@ class CreatureList:
                 creature.energy.energy = splitEnergy
                 offspring = Creature(self.screen, creature)
                 self.creatures.append(offspring)
+
+    # Get DNA values for plotting them
+    def dnaHistogram(self):
+        hopGenes = []
+        smellGenes = []
+        staminaGenes = []
+        for creature in self.creatures:
+            hopGenes.append(creature.dna.hopDistance)
+            smellGenes.append(creature.dna.smell)
+            staminaGenes.append(creature.dna.stamina)
+        return [hopGenes, smellGenes, staminaGenes]
+
