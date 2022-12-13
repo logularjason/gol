@@ -1,7 +1,6 @@
 import random 
 import math
 import pygame as pg
-startEnergy=1000
 
 # A class to model the traits of a creature
 class DNA:
@@ -117,14 +116,10 @@ class CreatureList:
             if didMove is False:
                 self.creatures.remove(creature)
 
-
-    def replicate(threshold, energy):
-        for creature in CreatureList:
-            if (energy >= threshold):
-                creature.energy = startEnergy 
-                CreatureList.append(creature)
-    
-
-
-        # loop over all creatures, if theyre energy is above threshold, then create new creature and put it in the list 
-        # i will need to figure out how to create a new creature with the right energy and DNA and fix parent energy 
+    def replicate(self, threshold, energySplittingFactor):
+        for creature in self.creatures:
+            if (creature.energy.energy >= threshold):
+                splitEnergy = creature.energy.energy * energySplittingFactor
+                creature.energy.energy = splitEnergy
+                offspring = Creature(self.screen, self.width, self.height, splitEnergy)
+                self.creatures.append(offspring)

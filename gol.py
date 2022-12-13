@@ -9,10 +9,10 @@ SCREEN_HEIGHT=800
 CREATURE_COUNT=40
 FRAMES_PER_SECOND=10 # how fast to run the main loop
 CREATURE_STARTING_ENERGY=1000 
-FOOD_ENERGY=25
+FOOD_ENERGY=75
 FOOD_CREATURE_FACTOR=1.5 # number of food = number of creatures * FOOD_CREATURE_FACTOR
 REPLICATION_HEALTH_THRESHOLD = CREATURE_STARTING_ENERGY * 2
-startEnergy=1000
+ENERGY_SPLITTING_FACTOR=0.5
 
 
 # ==========================================
@@ -58,7 +58,7 @@ def main():
 
         # Laura TBD: add a replicate method to CreatureList and uncomment the line below to call it 
         # The logic should create another creature with new DNA that is the same as the parent
-        # creatureList.replicate(CREATURE_REPLICATION_THRESHOLD)
+        creatureList.replicate(REPLICATION_HEALTH_THRESHOLD, ENERGY_SPLITTING_FACTOR)
          
 
         # Tell pygame to swap its double-buffer (this paints the new frame)
