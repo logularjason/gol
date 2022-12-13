@@ -71,19 +71,23 @@ class Creature:
             self.y = parent.y + random.randint(CREATURE_REPLICATION_DISTANCE, CREATURE_REPLICATION_DISTANCE)
         self.draw()
    
+    # draw the creature varying colour, opacity, radius
     def draw(self):
-        colour = self.colour();
-        alpha = colour.a
+        colour = self.colour() # colour depends on DNA and opacity depends on energy
+        opacity = colour.a
         radius=CREATURE_RADIUS
-        if (alpha < 75):
-            radius=radius*alpha/75
+        if (opacity < 75):
+            radius=radius*opacity/75 # if we have low opacity shrink the radius
+        # Need a surface to support opacity
         surface1 = pg.Surface((radius*2,radius*2))
         surface1.set_colorkey("black")
-        surface1.set_alpha(alpha)
+        surface1.set_alpha(opacity)
+        # Draw the circle on the surface
         pg.draw.circle(surface1, colour, [radius, radius], radius)
-        # pg.draw.circle(self.screen, colour, [self.x, self.y], radius)
+        # Put the surface on the screen
         self.screen.blit(surface1, [self.x-radius, self.y-radius])
 
+    # colour depends on DNA and opacity depends on energy
     def colour(self):
         red=self.calculateColorValue(self.dna.hopDistance)
         green=self.calculateColorValue(self.dna.stamina)
@@ -94,6 +98,7 @@ class Creature:
         print('r={} g={} b={} a={}'.format(red, green, blue, opacity))
         return pg.Color(red, green, blue, opacity)
 
+    # calculate one of r, g or b and ensure the value is clipped to (0,255)
     def calculateColorValue(self, gene):
         value = (gene-NORMALISED_GENE_MIN) * 255 / NORMALISED_GENE_RANGE
         if value < 0:
