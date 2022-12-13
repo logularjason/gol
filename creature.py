@@ -8,10 +8,15 @@ class DNA:
     # Create new DNA.  We use the parent DNA if it is passed to the constructor
     # Note that parentDna has a default of None if no argument is passed
     def __init__(self, parentDna = None):
+        hopDistance = random.randint(1, 100)
         if parentDna is None:
-            self.hopDistance = random.randint(1, 50)
+            self.hopDistance = hopDistance
+            self.smell = 100 - hopDistance
         else:
-            self.hopDistance = parentDna.hopDistance # Use the parent's DNA
+            fuzz = math.randint(-5, 5)
+            self.hopDistance = parentDna.hopDistance - fuzz # Use the parent's DNA
+            self.smell = parentDna.smell + fuzz
+
 
     def colour(self):
         return "blue"
@@ -122,4 +127,5 @@ class CreatureList:
                 splitEnergy = creature.energy.energy * energySplittingFactor
                 creature.energy.energy = splitEnergy
                 offspring = Creature(self.screen, self.width, self.height, splitEnergy)
+                offspring.dna = DNA(creature.dna)
                 self.creatures.append(offspring)
