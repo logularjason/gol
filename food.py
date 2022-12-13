@@ -11,7 +11,7 @@ class Food:
         self.energy = CREATURE_STARTING_ENERGY
 
     def draw(self):
-        pg.draw.rect(self.screen, "black", [self.x-2, self.y-2, 8, 8], 2) # left, top, width, height
+        pg.draw.rect(self.screen, "black", [self.x-4, self.y-4, 8, 8], 2) # left, top, width, height
 
     # return distance to creature
     def distance(self, creature):
