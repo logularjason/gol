@@ -73,12 +73,12 @@ class Creature:
    
     def draw(self):
         colour = self.colour();
-        surface1 = pg.Surface((CREATURE_RADIUS,CREATURE_RADIUS))
+        surface1 = pg.Surface((CREATURE_RADIUS*2,CREATURE_RADIUS*2))
         surface1.set_colorkey("black")
         surface1.set_alpha(colour.a)
-        pg.draw.circle(surface1, colour, [0, 0], CREATURE_RADIUS)
+        pg.draw.circle(surface1, colour, [CREATURE_RADIUS, CREATURE_RADIUS], CREATURE_RADIUS)
         # pg.draw.circle(self.screen, colour, [self.x, self.y], CREATURE_RADIUS)
-        self.screen.blit(surface1, [self.x, self.y])
+        self.screen.blit(surface1, [self.x-CREATURE_RADIUS, self.y-CREATURE_RADIUS])
 
     def colour(self):
         red=self.calculateColorValue(self.dna.hopDistance)
@@ -95,7 +95,10 @@ class Creature:
         if value < 0:
             return 0
         else:
-            return int(value)
+            if value > 255:
+                return 255
+            else:
+                return int(value)
 
     # Calculate our move vector based on our hopDistance
     # Return whether the creature passed over the food
