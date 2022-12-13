@@ -73,12 +73,16 @@ class Creature:
    
     def draw(self):
         colour = self.colour();
-        surface1 = pg.Surface((CREATURE_RADIUS*2,CREATURE_RADIUS*2))
+        alpha = colour.a
+        radius=CREATURE_RADIUS
+        if (alpha < 75):
+            radius=radius*alpha/75
+        surface1 = pg.Surface((radius*2,radius*2))
         surface1.set_colorkey("black")
-        surface1.set_alpha(colour.a)
-        pg.draw.circle(surface1, colour, [CREATURE_RADIUS, CREATURE_RADIUS], CREATURE_RADIUS)
-        # pg.draw.circle(self.screen, colour, [self.x, self.y], CREATURE_RADIUS)
-        self.screen.blit(surface1, [self.x-CREATURE_RADIUS, self.y-CREATURE_RADIUS])
+        surface1.set_alpha(alpha)
+        pg.draw.circle(surface1, colour, [radius, radius], radius)
+        # pg.draw.circle(self.screen, colour, [self.x, self.y], radius)
+        self.screen.blit(surface1, [self.x-radius, self.y-radius])
 
     def colour(self):
         red=self.calculateColorValue(self.dna.hopDistance)
