@@ -95,7 +95,7 @@ class Creature:
         opacity = int(self.energy.energy * ENERGY_OPACITY_FACTOR)
         if (opacity > 255):
             opacity = 255
-        print('r={} g={} b={} a={}'.format(red, green, blue, opacity))
+        # print('r={} g={} b={} a={}'.format(red, green, blue, opacity))
         return pg.Color(red, green, blue, opacity)
 
     # calculate one of r, g or b and ensure the value is clipped to (0,255)
@@ -138,7 +138,7 @@ class Creature:
         distance = nearestFood.distance(self)
         direction = nearestFood.direction(self)
         didHopOverFood = self.calculateMoveVector(direction, distance)
-        print('cx={} cy={} fx={} fy={} mx={} my={} angle={:2.2} energy={}'.format(self.x, self.y, nearestFood.x, nearestFood.y, self.mx, self.my, direction, self.energy.energy))
+        # print('cx={} cy={} fx={} fy={} mx={} my={} angle={:2.2} energy={}'.format(self.x, self.y, nearestFood.x, nearestFood.y, self.mx, self.my, direction, self.energy.energy))
 
         self.energy.updateEnergy(self.mx, self.my)
 
