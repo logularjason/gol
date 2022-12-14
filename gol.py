@@ -76,11 +76,11 @@ def main():
             plot1.hist(dnaData[1], bins, alpha=0.5, density=True, edgecolor='black', color='green', label='smell')
             plot1.hist(dnaData[2], bins, alpha=0.5, density=True, edgecolor='black', color='blue', label='stamina')
             plot1.legend(loc='upper right')
-            plot2.set_title('Gene histogram')
+            plot1.set_title('Gene histogram')
             energyData = creatureList.energyData()
             plot2.cla()
             plot2.plot(energyData)
-            plot2.set_title('Energy')
+            plot2.set_title('Energy vs Creature ID')
             plt.tight_layout()
             plt.pause(0.05)
 
