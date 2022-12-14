@@ -33,6 +33,9 @@ def main():
     # A few helpers for plotting a histogram
     i = 0
     bins = range(0,101,2)
+    # Define two plots
+    plot1 = plt.subplot2grid((1, 2), (0, 0), colspan=1)
+    plot2 = plt.subplot2grid((1, 2), (0, 1), colspan=2)
 
     while not done:
         # This limits the while loop to a max of n times per second.
@@ -60,15 +63,25 @@ def main():
         # Tell pygame to swap its double-buffer (this paints the new frame)
         pg.display.flip()
 
+        # Use matplotlib to show some charts
         i = i + 1
         i = i % 20
-        if (i is 1):
-            histograms = creatureList.dnaHistogram()
-            plt.clf()
-            plt.hist(histograms[0], bins, alpha=0.5, density=True, edgecolor='black', color='red', label='hop')
-            plt.hist(histograms[1], bins, alpha=0.5, density=True, edgecolor='black', color='green', label='smell')
-            plt.hist(histograms[2], bins, alpha=0.5, density=True, edgecolor='black', color='blue', label='stamina')
-            plt.legend(loc='upper right')
+        if (i == 1):
+            # plt.clf() # clear the plot
+            # Get current DNA set
+            dnaData = creatureList.dnaData()
+            # Show three histograms, each 0.5 transparent and with a different colour and label
+            plot1.cla()
+            plot1.hist(dnaData[0], bins, alpha=0.5, density=True, edgecolor='black', color='red', label='hop')
+            plot1.hist(dnaData[1], bins, alpha=0.5, density=True, edgecolor='black', color='green', label='smell')
+            plot1.hist(dnaData[2], bins, alpha=0.5, density=True, edgecolor='black', color='blue', label='stamina')
+            plot1.legend(loc='upper right')
+            plot2.set_title('Gene histogram')
+            energyData = creatureList.energyData()
+            plot2.cla()
+            plot2.plot(energyData)
+            plot2.set_title('Energy')
+            plt.tight_layout()
             plt.pause(0.05)
 
 

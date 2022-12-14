@@ -183,7 +183,7 @@ class CreatureList:
                 self.creatures.append(offspring)
 
     # Get DNA values for plotting them
-    def dnaHistogram(self):
+    def dnaData(self):
         hopGenes = []
         smellGenes = []
         staminaGenes = []
@@ -193,3 +193,9 @@ class CreatureList:
             staminaGenes.append(creature.dna.stamina)
         return [hopGenes, smellGenes, staminaGenes]
 
+    # Get energy values for plotting them
+    def energyData(self):
+        energyList = []
+        for creature in self.creatures:
+            energyList.append(creature.energy.energy)
+        return energyList
