@@ -35,6 +35,7 @@ python3 -m venv venv
 Then, install some libraries that are required:
 
 ```
+source venv/bin/activate
 pip3 install PyOpenGL PyOpenGL_accelerate pygame
 pip3 install numpy matplotlib
 ```
