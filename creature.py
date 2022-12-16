@@ -47,8 +47,10 @@ class Energy:
             self.energy = suppliedEnergy
 
     # Update our health based on move distance - moving has a cost
-    def updateEnergy(self, mx, my):
-        self.energy = self.energy - math.sqrt(mx*mx + my*my)
+    def updateEnergy(self, mx, my, stamina):
+        correctedStamina = (1 - ((stamina - NORMALISED_GENE_MIN) / NORMALISED_GENE_RANGE)) + STAMINA_OFFSET
+        self.energy = self.energy - math.sqrt(mx*mx + my*my) * correctedStamina
+        print('self.energy={} stamina={} correctedStamina={}'.format(self.energy, stamina, correctedStamina))
 
 
 # A class to represent a creature 
@@ -140,7 +142,7 @@ class Creature:
         didHopOverFood = self.calculateMoveVector(direction, distance)
         # print('cx={} cy={} fx={} fy={} mx={} my={} angle={:2.2} energy={}'.format(self.x, self.y, nearestFood.x, nearestFood.y, self.mx, self.my, direction, self.energy.energy))
 
-        self.energy.updateEnergy(self.mx, self.my)
+        self.energy.updateEnergy(self.mx, self.my, self.dna.stamina)
 
         # Move if we have enerty or die
         if self.energy.energy > 0:
