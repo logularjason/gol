@@ -13,6 +13,7 @@ class DNA:
             self.generateDna()
         else:
             self.replicateDna(parentDna)
+        # self.printGenes('Instantiate')
 
     # generate DNA which totals to 100
     # each gene is a fractionof this 100
@@ -30,10 +31,19 @@ class DNA:
         hopDistance = parentDna.hopDistance + random.randint(-GENE_REPLICATION_FUZZ, GENE_REPLICATION_FUZZ)
         smell = parentDna.smell + random.randint(-GENE_REPLICATION_FUZZ, GENE_REPLICATION_FUZZ)
         stamina = parentDna.stamina + random.randint(-GENE_REPLICATION_FUZZ, GENE_REPLICATION_FUZZ)
+        if hopDistance < 0:
+            hopDistance = 0
+        if smell < 0:
+            smell = 0
+        if stamina < 0:
+            stamina = 0
         normalise = 100 / (hopDistance + smell + stamina)
         self.hopDistance = hopDistance * normalise
         self.smell = smell * normalise
         self.stamina = stamina * normalise
+
+    def printGenes(self, message):
+        print(message + ' ho={} st={} sm={}'.format(self.hopDistance, self.stamina, self.smell))
 
 # Hold the energy of a creature and provide methods to calculate
 # changes to energy based on movement, etc.
@@ -54,7 +64,7 @@ class Energy:
         foodCostFactor = (1 - normalisedStamina) * STAMINA_FACTOR + (1 - STAMINA_FACTOR)
         # Weight the food cost by 1 for poor stamina and 0.6 for good stamina (if factor is 0.6)
         self.energy = self.energy - math.sqrt(mx*mx + my*my) * foodCostFactor
-        print('self.energy={} stamina={} correctedStamina={}'.format(self.energy, stamina, foodCostFactor))
+        # print('self.energy={} stamina={} correctedStamina={}'.format(self.energy, stamina, foodCostFactor))
 
 
 # A class to represent a creature 
@@ -187,6 +197,7 @@ class CreatureList:
                 creature.energy.energy = splitEnergy
                 offspring = Creature(self.screen, creature)
                 self.creatures.append(offspring)
+                offspring.dna.printGenes('Replicate offspring')
 
     # Get DNA values for plotting them
     def dnaData(self):
@@ -197,7 +208,7 @@ class CreatureList:
             hopGenes.append(creature.dna.hopDistance)
             smellGenes.append(creature.dna.smell)
             staminaGenes.append(creature.dna.stamina)
-        return [hopGenes, smellGenes, staminaGenes]
+        return [hopGenes, staminaGenes, smellGenes]
 
     # Get energy values for plotting them
     def energyData(self):

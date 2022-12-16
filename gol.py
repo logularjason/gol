@@ -73,8 +73,8 @@ def main():
             # Show three histograms, each 0.5 transparent and with a different colour and label
             plot1.cla()
             plot1.hist(dnaData[0], bins, alpha=0.5, density=True, edgecolor='black', color='red', label='hop')
-            plot1.hist(dnaData[1], bins, alpha=0.5, density=True, edgecolor='black', color='green', label='smell')
-            plot1.hist(dnaData[2], bins, alpha=0.5, density=True, edgecolor='black', color='blue', label='stamina')
+            plot1.hist(dnaData[1], bins, alpha=0.5, density=True, edgecolor='black', color='green', label='stamina')
+            plot1.hist(dnaData[2], bins, alpha=0.5, density=True, edgecolor='black', color='blue', label='smell')
             plot1.legend(loc='upper right')
             plot1.set_title('Gene histogram')
             energyData = creatureList.energyData()
