@@ -37,7 +37,7 @@ Then, install some libraries that are required:
 ```
 source venv/bin/activate
 pip3 install PyOpenGL PyOpenGL_accelerate pygame
-pip3 install numpy matplotlib
+pip3 install numpy matplotlijb
 ```
 
 This did not work under windows - had to download whl files from here: https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyopengl
@@ -60,7 +60,7 @@ source venv/bin/activate
 python gol.py
 ```
 
-## Notes for later
+## Notes for latesr
 
 Later, we will need to add some things to manage dependencies
 

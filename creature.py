@@ -48,9 +48,13 @@ class Energy:
 
     # Update our health based on move distance - moving has a cost
     def updateEnergy(self, mx, my, stamina):
-        correctedStamina = (1 - ((stamina - NORMALISED_GENE_MIN) / NORMALISED_GENE_RANGE)) + STAMINA_OFFSET
-        self.energy = self.energy - math.sqrt(mx*mx + my*my) * correctedStamina
-        print('self.energy={} stamina={} correctedStamina={}'.format(self.energy, stamina, correctedStamina))
+        # This varies [0,1] for [poor, good]
+        normalisedStamina = ((stamina - NORMALISED_GENE_MIN) / NORMALISED_GENE_RANGE) 
+        # If factor is 0.6, then foodCostFactor = [1,0] * 0.6 + 0.4 = [1, 0.4] for [poor, good]
+        foodCostFactor = (1 - normalisedStamina) * STAMINA_FACTOR + (1 - STAMINA_FACTOR)
+        # Weight the food cost by 1 for poor stamina and 0.6 for good stamina (if factor is 0.6)
+        self.energy = self.energy - math.sqrt(mx*mx + my*my) * foodCostFactor
+        print('self.energy={} stamina={} correctedStamina={}'.format(self.energy, stamina, foodCostFactor))
 
 
 # A class to represent a creature 
