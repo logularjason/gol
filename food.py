@@ -4,14 +4,20 @@ import math
 from constants import *
 
 class Food:
-    def __init__(self, screen):
+    def __init__(self, screen, x = None, y = None):
         self.screen = screen
-        self.x = random.randint(0, SCREEN_WIDTH)
-        self.y = random.randint(0, SCREEN_HEIGHT)
+        if x is None:
+            self.x = random.randint(0, SCREEN_WIDTH)
+            self.y = random.randint(0, SCREEN_HEIGHT)
+            self.colour = "black"
+        else:
+            self.x = x 
+            self.y = y
+            self.colour = "red"
         self.energy = CREATURE_STARTING_ENERGY
 
     def draw(self):
-        pg.draw.rect(self.screen, "black", [self.x-4, self.y-4, 8, 8], 2) # left, top, width, height
+        pg.draw.rect(self.screen, self.colour, [self.x-4, self.y-4, 8, 8], 2) # left, top, width, height
 
     # return distance to creature
     def distance(self, creature):

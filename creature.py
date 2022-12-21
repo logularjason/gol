@@ -2,6 +2,7 @@ import random
 import math
 import pygame as pg
 from constants import *
+from food import *
 
 # A class to model the traits of a creature
 class DNA:
@@ -188,6 +189,10 @@ class CreatureList:
             didMove = creature.move(foodlist)
             if didMove is False:
                 self.creatures.remove(creature)
+                body = Food(foodlist.screen, creature.x, creature.y)
+                foodlist.foodlist.append(body)
+            
+
 
     # Replicate healthy creatures
     def replicate(self):
