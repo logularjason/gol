@@ -102,6 +102,7 @@ class Creature:
     def poison(self, poison):
         newenergy = self.energy.energy - poison
         self.energy.energy = newenergy
+        print('Poison energy={} poison={}'.format(self.energy.energy, poison))
 
     # draw the creature varying colour, opacity, radius
     def draw(self):
@@ -175,7 +176,7 @@ class Creature:
         self.energy.updateEnergy(self.mx, self.my, self.dna.stamina)
 
         nearestCreature = creaturelist.nearest(self)
-        if nearestCreature != None:
+        if nearestCreature is not None:
             nearestCreature.poison(self.dna.poison)
 
         # Move if we have enerty or die
@@ -209,18 +210,20 @@ class CreatureList:
             didMove = creature.move(foodlist, self)
             if didMove is False:
                 self.creatures.remove(creature)
-                body = Food(foodlist.screen, creature.x, creature.y)
-                foodlist.foodlist.append(body)
+                newFood = Food(foodlist.screen, creature.x, creature.y)
+                foodlist.foodlist.append(newFood)
             
    
     def nearest(self, creature):
         bestCreature = None
         bestDistance = float('inf') # start with infinity - this is wierd syntax BTW
-        for creature in self.creaturelist:
-            d = creature.distance(creature)
+        otherCreatures = self.creatures.copy()
+        otherCreatures.remove(creature)
+        for c in otherCreatures:
+            d = c.distance(creature)
             if (d < bestDistance):
                 bestDistance = d
-                bestCreature = creature
+                bestCreature = c
         if bestDistance < POISON_MAX_DISTANCE:
             return bestCreature
         else:
@@ -241,11 +244,13 @@ class CreatureList:
         hopGenes = []
         smellGenes = []
         staminaGenes = []
+        poisonGenes = []
         for creature in self.creatures:
             hopGenes.append(creature.dna.hopDistance)
             smellGenes.append(creature.dna.smell)
             staminaGenes.append(creature.dna.stamina)
-        return [hopGenes, staminaGenes, smellGenes]
+            poisonGenes.append(creature.dna.poison)
+        return [hopGenes, staminaGenes, smellGenes, poisonGenes]
 
     # Get energy values for plotting them
     def energyData(self):
