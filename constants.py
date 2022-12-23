@@ -16,4 +16,5 @@ CREATURE_REPLICATION_DISTANCE = 25 # how far away a creature can replicate
 GENE_REPLICATION_FUZZ=5 # how much to alter a gene on replication
 CREATURE_RADIUS=20
 ENERGY_OPACITY_FACTOR=0.1 * 255 / CREATURE_STARTING_ENERGY
-STAMINA_FACTOR = 0.3 # food cost will vary on [1-factor, 1]
+STAMINA_FACTOR = 0.3 # food cost will vary on [1-factor, 1] 
+POISON_MAX_DISTANCE = 20

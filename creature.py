@@ -22,29 +22,35 @@ class DNA:
         hopDistance = random.randint(MIN_GENE, MAX_GENE)
         smell = random.randint(MIN_GENE, MAX_GENE)
         stamina = random.randint(MIN_GENE, MAX_GENE)
-        normalise = 100 / (hopDistance + smell + stamina)
+        poison = random.randint(MIN_GENE, MAX_GENE)
+        normalise = 100 / (hopDistance + smell + stamina + poison)
         self.hopDistance = hopDistance * normalise
         self.smell = smell * normalise
         self.stamina = stamina * normalise
+        self.poison = poison * normalise
 
     # Add fuzz to each parent gene, then normalise back so that total is still 100
     def replicateDna(self, parentDna):
         hopDistance = parentDna.hopDistance + random.randint(-GENE_REPLICATION_FUZZ, GENE_REPLICATION_FUZZ)
         smell = parentDna.smell + random.randint(-GENE_REPLICATION_FUZZ, GENE_REPLICATION_FUZZ)
         stamina = parentDna.stamina + random.randint(-GENE_REPLICATION_FUZZ, GENE_REPLICATION_FUZZ)
+        poison = parentDna.poison + random.randint(-GENE_REPLICATION_FUZZ, GENE_REPLICATION_FUZZ)
         if hopDistance < 0:
             hopDistance = 0
         if smell < 0:
             smell = 0
         if stamina < 0:
             stamina = 0
-        normalise = 100 / (hopDistance + smell + stamina)
+        if poison < 0:
+            poison = 0
+        normalise = 100 / (hopDistance + smell + stamina + poison)
         self.hopDistance = hopDistance * normalise
         self.smell = smell * normalise
         self.stamina = stamina * normalise
+        self.poison = poison * normalise
 
     def printGenes(self, message):
-        print(message + ' ho={} st={} sm={}'.format(self.hopDistance, self.stamina, self.smell))
+        print(message + ' ho={} st={} sm={} poi={}'.format(self.hopDistance, self.stamina, self.smell, self.poison))
 
 # Hold the energy of a creature and provide methods to calculate
 # changes to energy based on movement, etc.
@@ -88,6 +94,15 @@ class Creature:
             self.y = parent.y + random.randint(CREATURE_REPLICATION_DISTANCE, CREATURE_REPLICATION_DISTANCE)
         self.draw()
    
+    def distance(self, creature):
+        dx = self.x - creature.x
+        dy = self.y - creature.y
+        return math.sqrt(dx * dx + dy * dy)
+
+    def poison(self, poison):
+        newenergy = self.energy.energy - poison
+        self.energy.energy = newenergy
+
     # draw the creature varying colour, opacity, radius
     def draw(self):
         colour = self.colour() # colour depends on DNA and opacity depends on energy
@@ -149,7 +164,7 @@ class Creature:
         return didHopOverFood
 
     # Move and die if no energy left
-    def move(self, foodlist):
+    def move(self, foodlist, creaturelist):
         # Get details of the food, direction, and whether we got the food
         nearestFood = foodlist.nearest(self)
         distance = nearestFood.distance(self)
@@ -159,6 +174,10 @@ class Creature:
 
         self.energy.updateEnergy(self.mx, self.my, self.dna.stamina)
 
+        nearestCreature = creaturelist.nearest(self)
+        if nearestCreature != None:
+            nearestCreature.poison(self.dna.poison)
+
         # Move if we have enerty or die
         if self.energy.energy > 0:
             self.draw()
@@ -167,6 +186,7 @@ class Creature:
             return True
         else:
             return False
+
 
     def eat(self, foodlist, food):
         self.energy.energy = self.energy.energy + food.energy
@@ -186,13 +206,25 @@ class CreatureList:
     def move(self, foodlist):
         # Move each creature
         for creature in self.creatures:
-            didMove = creature.move(foodlist)
+            didMove = creature.move(foodlist, self)
             if didMove is False:
                 self.creatures.remove(creature)
                 body = Food(foodlist.screen, creature.x, creature.y)
                 foodlist.foodlist.append(body)
             
-
+   
+    def nearest(self, creature):
+        bestCreature = None
+        bestDistance = float('inf') # start with infinity - this is wierd syntax BTW
+        for creature in self.creaturelist:
+            d = creature.distance(creature)
+            if (d < bestDistance):
+                bestDistance = d
+                bestCreature = creature
+        if bestDistance < POISON_MAX_DISTANCE:
+            return bestCreature
+        else:
+            return None
 
     # Replicate healthy creatures
     def replicate(self):
