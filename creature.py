@@ -49,8 +49,8 @@ class DNA:
         self.stamina = stamina * normalise
         self.poison = poison * normalise
 
-    def printGenes(self, message):
-        print(message + ' ho={} st={} sm={} poi={}'.format(self.hopDistance, self.stamina, self.smell, self.poison))
+    def printGenes(self, message, id):
+        print(message + 'id={} ho={} st={} sm={} poi={}'.format(id, self.hopDistance, self.stamina, self.smell, self.poison))
 
 # Hold the energy of a creature and provide methods to calculate
 # changes to energy based on movement, etc.
@@ -77,21 +77,27 @@ class Energy:
 # A class to represent a creature 
 class Creature:
 
+    serialNumber = 1
+
     # Constructor to create a new creature
     def __init__(self, screen, parent = None):
         self.screen = screen
+        self.id = Creature.serialNumber
+        Creature.serialNumber+=1
         if (parent is None):
             # Generate random properties
             self.x = random.randint(0, SCREEN_WIDTH)
             self.y = random.randint(0, SCREEN_HEIGHT)
             self.dna = DNA()
             self.energy = Energy()
+            self.parent = None
         else:
             # Base our properties on the parent properties
             self.dna = DNA(parent.dna)
             self.energy = Energy(parent.energy.energy * ENERGY_SPLITTING_FACTOR)
             self.x = parent.x + random.randint(CREATURE_REPLICATION_DISTANCE, CREATURE_REPLICATION_DISTANCE)
             self.y = parent.y + random.randint(CREATURE_REPLICATION_DISTANCE, CREATURE_REPLICATION_DISTANCE)
+            self.parent = parent
         self.draw()
    
     def distance(self, creature):
@@ -102,7 +108,7 @@ class Creature:
     def poison(self, poison):
         newenergy = self.energy.energy - poison
         self.energy.energy = newenergy
-        print('Poison energy={} poison={}'.format(self.energy.energy, poison))
+        print('Poison id={} energy={} poison={}'.format(self.id, self.energy.energy, poison))
 
     # draw the creature varying colour, opacity, radius
     def draw(self):
@@ -176,7 +182,8 @@ class Creature:
         self.energy.updateEnergy(self.mx, self.my, self.dna.stamina)
 
         nearestCreature = creaturelist.nearest(self)
-        if nearestCreature is not None:
+        # Don't poison our offspring
+        if nearestCreature is not None and nearestCreature is not self.parent:
             nearestCreature.poison(self.dna.poison)
 
         # Move if we have enerty or die
@@ -237,7 +244,7 @@ class CreatureList:
                 creature.energy.energy = splitEnergy
                 offspring = Creature(self.screen, creature)
                 self.creatures.append(offspring)
-                offspring.dna.printGenes('Replicate offspring')
+                offspring.dna.printGenes('Replicate offspring', offspring.id)
 
     # Get DNA values for plotting them
     def dnaData(self):
