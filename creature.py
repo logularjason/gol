@@ -2,96 +2,36 @@ import random
 import math
 import pygame as pg
 from constants import *
+from dna import *
+from energy import *
 from food import *
-
-# A class to model the traits of a creature
-class DNA:
-
-    # Create new DNA.  We use the parent DNA if it is passed to the constructor
-    # Note that parentDna has a default of None if no argument is passed
-    def __init__(self, parentDna = None):
-        if parentDna is None:
-            self.generateDna()
-        else:
-            self.replicateDna(parentDna)
-        # self.printGenes('Instantiate')
-
-    # generate DNA which totals to 100
-    # each gene is a fractionof this 100
-    def generateDna(self):
-        hopDistance = random.randint(MIN_GENE, MAX_GENE)
-        smell = random.randint(MIN_GENE, MAX_GENE)
-        stamina = random.randint(MIN_GENE, MAX_GENE)
-        poison = random.randint(MIN_GENE, MAX_GENE)
-        normalise = 100 / (hopDistance + smell + stamina + poison)
-        self.hopDistance = hopDistance * normalise
-        self.smell = smell * normalise
-        self.stamina = stamina * normalise
-        self.poison = poison * normalise
-
-    # Add fuzz to each parent gene, then normalise back so that total is still 100
-    def replicateDna(self, parentDna):
-        hopDistance = parentDna.hopDistance + random.randint(-GENE_REPLICATION_FUZZ, GENE_REPLICATION_FUZZ)
-        smell = parentDna.smell + random.randint(-GENE_REPLICATION_FUZZ, GENE_REPLICATION_FUZZ)
-        stamina = parentDna.stamina + random.randint(-GENE_REPLICATION_FUZZ, GENE_REPLICATION_FUZZ)
-        poison = parentDna.poison + random.randint(-GENE_REPLICATION_FUZZ, GENE_REPLICATION_FUZZ)
-        if hopDistance < 0:
-            hopDistance = 0
-        if smell < 0:
-            smell = 0
-        if stamina < 0:
-            stamina = 0
-        if poison < 0:
-            poison = 0
-        normalise = 100 / (hopDistance + smell + stamina + poison)
-        self.hopDistance = hopDistance * normalise
-        self.smell = smell * normalise
-        self.stamina = stamina * normalise
-        self.poison = poison * normalise
-
-    def printGenes(self, message):
-        print(message + ' ho={} st={} sm={} poi={}'.format(self.hopDistance, self.stamina, self.smell, self.poison))
-
-# Hold the energy of a creature and provide methods to calculate
-# changes to energy based on movement, etc.
-class Energy:
-
-    # Create new Energy
-    def __init__(self, suppliedEnergy = None):
-        if (suppliedEnergy is None):
-            self.energy = CREATURE_STARTING_ENERGY
-        else:
-            self.energy = suppliedEnergy
-
-    # Update our health based on move distance - moving has a cost
-    def updateEnergy(self, mx, my, stamina):
-        # This varies [0,1] for [poor, good]
-        normalisedStamina = ((stamina - NORMALISED_GENE_MIN) / NORMALISED_GENE_RANGE) 
-        # If factor is 0.6, then foodCostFactor = [1,0] * 0.6 + 0.4 = [1, 0.4] for [poor, good]
-        foodCostFactor = (1 - normalisedStamina) * STAMINA_FACTOR + (1 - STAMINA_FACTOR)
-        # Weight the food cost by 1 for poor stamina and 0.6 for good stamina (if factor is 0.6)
-        self.energy = self.energy - math.sqrt(mx*mx + my*my) * foodCostFactor
-        # print('self.energy={} stamina={} correctedStamina={}'.format(self.energy, stamina, foodCostFactor))
 
 
 # A class to represent a creature 
 class Creature:
 
+    serialNumber = 1
+
     # Constructor to create a new creature
     def __init__(self, screen, parent = None):
         self.screen = screen
+        self.id = Creature.serialNumber
+        self.age = 1
+        Creature.serialNumber+=1
         if (parent is None):
             # Generate random properties
             self.x = random.randint(0, SCREEN_WIDTH)
             self.y = random.randint(0, SCREEN_HEIGHT)
             self.dna = DNA()
             self.energy = Energy()
+            self.parent = None
         else:
             # Base our properties on the parent properties
             self.dna = DNA(parent.dna)
             self.energy = Energy(parent.energy.energy * ENERGY_SPLITTING_FACTOR)
             self.x = parent.x + random.randint(CREATURE_REPLICATION_DISTANCE, CREATURE_REPLICATION_DISTANCE)
             self.y = parent.y + random.randint(CREATURE_REPLICATION_DISTANCE, CREATURE_REPLICATION_DISTANCE)
+            self.parent = parent
         self.draw()
    
     def distance(self, creature):
@@ -99,19 +39,15 @@ class Creature:
         dy = self.y - creature.y
         return math.sqrt(dx * dx + dy * dy)
 
-    def poison(self, poison):
-        newenergy = self.energy.energy - poison
-        self.energy.energy = newenergy
-
     # draw the creature varying colour, opacity, radius
     def draw(self):
-        colour = self.colour() # colour depends on DNA and opacity depends on energy
+        colour = self.fillColour() # colour depends on DNA and opacity depends on energy
         opacity = colour.a
         radius=CREATURE_RADIUS
         if (opacity < 75):
             radius=radius*opacity/75 # if we have low opacity shrink the radius
         # Need a surface to support opacity
-        surface1 = pg.Surface((radius*2,radius*2))
+        surface1 = pg.Surface((radius*2, radius*2))
         surface1.set_colorkey("black")
         surface1.set_alpha(opacity)
         # Draw the circle on the surface
@@ -119,8 +55,13 @@ class Creature:
         # Put the surface on the screen
         self.screen.blit(surface1, [self.x-radius, self.y-radius])
 
+        # Draw a border around the circle whose colour and thickness vary
+        pg.draw.circle(self.screen, self.borderColour(), [self.x, self.y], radius, width=self.borderThickness())
+        self.age += 1
+
+
     # colour depends on DNA and opacity depends on energy
-    def colour(self):
+    def fillColour(self):
         red=self.calculateColorValue(self.dna.hopDistance)
         green=self.calculateColorValue(self.dna.stamina)
         blue=self.calculateColorValue(self.dna.smell)
@@ -140,6 +81,16 @@ class Creature:
                 return 255
             else:
                 return int(value)
+
+    # The colour of the border around the circle
+    def borderColour(self):
+        # Laura TBD - suggest change the colour based on whether we have been poisoned.
+        return "black"
+
+    # The thickness of the border
+    def borderThickness(self):
+        # Laura TBD - suggest change the thickness based on whether we have been poisoned.
+        return 1
 
     # Calculate our move vector based on our hopDistance
     # Return whether the creature passed over the food
@@ -163,6 +114,13 @@ class Creature:
         didHopOverFood = (self.dna.hopDistance >= distance)
         return didHopOverFood
 
+    # Reduce our energy based on the poison value passed
+    def poison(self, poison):
+        newenergy = self.energy.energy - poison
+        self.energy.energy = newenergy
+        # Laura TBD - suggest store the age we were poisoned here
+        print('Poison id={} energy={} poison={}'.format(self.id, self.energy.energy, poison))
+
     # Move and die if no energy left
     def move(self, foodlist, creaturelist):
         # Get details of the food, direction, and whether we got the food
@@ -175,7 +133,8 @@ class Creature:
         self.energy.updateEnergy(self.mx, self.my, self.dna.stamina)
 
         nearestCreature = creaturelist.nearest(self)
-        if nearestCreature != None:
+        # Don't poison our offspring
+        if nearestCreature is not None and nearestCreature is not self.parent:
             nearestCreature.poison(self.dna.poison)
 
         # Move if we have enerty or die
@@ -192,6 +151,7 @@ class Creature:
         self.energy.energy = self.energy.energy + food.energy
         foodlist.respawn(food)
 
+# A class to represent a list of creatures
 class CreatureList:
 
     # Constructor to create a new creature
@@ -209,18 +169,20 @@ class CreatureList:
             didMove = creature.move(foodlist, self)
             if didMove is False:
                 self.creatures.remove(creature)
-                body = Food(foodlist.screen, creature.x, creature.y)
-                foodlist.foodlist.append(body)
+                newFood = Food(foodlist.screen, creature.x, creature.y)
+                foodlist.foodlist.append(newFood)
             
-   
+    # return the creature nearest to the one specified or None creature is too far away
     def nearest(self, creature):
         bestCreature = None
         bestDistance = float('inf') # start with infinity - this is wierd syntax BTW
-        for creature in self.creaturelist:
-            d = creature.distance(creature)
+        otherCreatures = self.creatures.copy()
+        otherCreatures.remove(creature)
+        for c in otherCreatures:
+            d = c.distance(creature)
             if (d < bestDistance):
                 bestDistance = d
-                bestCreature = creature
+                bestCreature = c
         if bestDistance < POISON_MAX_DISTANCE:
             return bestCreature
         else:
@@ -234,18 +196,20 @@ class CreatureList:
                 creature.energy.energy = splitEnergy
                 offspring = Creature(self.screen, creature)
                 self.creatures.append(offspring)
-                offspring.dna.printGenes('Replicate offspring')
+                offspring.dna.printGenes('Replicate offspring', offspring.id)
 
     # Get DNA values for plotting them
     def dnaData(self):
         hopGenes = []
         smellGenes = []
         staminaGenes = []
+        poisonGenes = []
         for creature in self.creatures:
             hopGenes.append(creature.dna.hopDistance)
             smellGenes.append(creature.dna.smell)
             staminaGenes.append(creature.dna.stamina)
-        return [hopGenes, staminaGenes, smellGenes]
+            poisonGenes.append(creature.dna.poison)
+        return [hopGenes, staminaGenes, smellGenes, poisonGenes]
 
     # Get energy values for plotting them
     def energyData(self):
