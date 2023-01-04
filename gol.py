@@ -56,7 +56,6 @@ def main():
         # Move the creatures
         creatureList.move(foodlist)
 
-        # Laura TBD: add a replicate method to CreatureList and uncomment the line below to call it 
         # The logic should create another creature with new DNA that is the same as the parent
         creatureList.replicate()
          
