@@ -1,6 +1,13 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+class Cow:
+    def __init__(self, age):
+        self.cowAge = age
+
+def printDog(dogName):
+    print("my dog is called ", dogName)
+
 
 # ==========================================
 # This function runs the script
@@ -25,3 +32,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+    printDog("bruce")
+    foo = "gus"
+    printDog(foo)
+    firstCow = Cow(3)
+    secondCow = Cow(2)
