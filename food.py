@@ -26,20 +26,27 @@ class Food:
         smell = creature.dna.smell
         dx = self.x - creature.x
         dy = self.y - creature.y
+        # This varies on interval [badSmell, goodSmell] = [0, 1]
         normalisedSmell = ((smell - NORMALISED_GENE_MIN) / NORMALISED_GENE_RANGE) 
-        smellCostFactor = (1 - normalisedSmell) * SMELL_FACTOR + (1 - SMELL_FACTOR)
+        # This varies on interval [badSmell, goodSmell] = [0.3, 0]
+        # when SMELL_FACTOR=0.3
+        smellCostFactor = (1 - normalisedSmell) * SMELL_FACTOR
         distance = math.sqrt(dx * dx + dy * dy)
         #print ("smell =", smell, "normalisedSmell = ", normalisedSmell, " smellCostFactor =", smellCostFactor)
-        return distance * smellCostFactor 
+        return distance + (distance * smellCostFactor * random.randint(-1, 1))
 
     # return the direction of the food
     def direction(self, creature):
         smell = creature.dna.smell
         dx = self.x - creature.x
         dy = self.y - creature.y
+        # This varies on interval [badSmell, goodSmell] = [0, 1]
         normalisedSmell = ((smell - NORMALISED_GENE_MIN) / NORMALISED_GENE_RANGE) 
-        smellCostFactor = (1 - normalisedSmell) * SMELL_FACTOR + (1 - SMELL_FACTOR)
-        return math.atan2(dy, dx)+ (smellCostFactor * random.randint(-1, 1))
+        # This varies on interval [badSmell, goodSmell] = [0.3, 0]
+        # when SMELL_FACTOR=0.3
+        smellCostFactor = (1 - normalisedSmell) * SMELL_FACTOR
+        angle = math.atan2(dy, dx) 
+        return angle + (angle * smellCostFactor * random.randint(-1, 1))
 
 class Foodlist:
     def __init__(self, screen, creatureList):
