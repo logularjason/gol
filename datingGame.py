@@ -11,6 +11,7 @@ CANDIDATE_RADIUS=15
 FRAMES_PER_SECOND=10
 CANDIDATE_COUNT= 10
 SAMPLE_SIZE = 3
+NUMBER_TRIALS = 5
 #font = pg.font.Font(None, 32)
 pg.font.init()
 font = pg.font.SysFont("comicsansms", 12)
@@ -40,9 +41,11 @@ class Candidate:
 class CandidateList:
 
     # Constructor to create a new candidate
-    def __init__(self, screen):
+    def __init__(self, screen, row):
         self.screen = screen
         self.candidate = []
+        self.bestCandidate = None
+        self.y = 100 + row * 80
         # Repeatedly create candidates
         for cand in range(CANDIDATE_COUNT):
             self.candidate = self.candidate + [Candidate(screen, cand)]
@@ -84,20 +87,21 @@ class CandidateList:
         index = self.candidate.index(c)
         return 80 + index * 55
 
-    def draw(self, bestCandidate):
-        y = 400
+    def draw(self):
         for cand in self.candidate[0:SAMPLE_SIZE]:
             x = self.calculateX(cand)
-            cand.draw("blue", x, y)
+            cand.draw("blue", x, self.y)
         for cand in self.candidate[SAMPLE_SIZE:CANDIDATE_COUNT]:
             x = self.calculateX(cand)
-            cand.draw("red", x, y)
+            cand.draw("red", x, self.y)
+        x = self.calculateX(self.bestCandidate)
+        self.bestCandidate.draw("green", x, self.y)
+    
+    def runTrial(self):
+        bestCandidateId = self.bestAS()
+        self.bestCandidate = self.findCandidate(bestCandidateId)
 
-        x = self.calculateX(bestCandidate)
-        bestCandidate.draw("green", x, y)
 
-
-   
 def main():
 
     # Initialise the pygame framework
@@ -108,11 +112,13 @@ def main():
     pg.display.set_caption("THE DATING GAME")
     done = False
 
-    candidateList = CandidateList(screen)
-    random.shuffle(candidateList.candidate)
-    bestCandidateId = candidateList.bestAS()
-    bestCandidate = candidateList.findCandidate(bestCandidateId)
-    print('found candidate=', bestCandidate.id)
+    trialList = []
+    for row in range(NUMBER_TRIALS):
+        cl = CandidateList(screen, row)
+        random.shuffle(cl.candidate)
+        cl.runTrial()
+        trialList = trialList + [cl]
+
     
     while not done:
         # This limits the while loop to a max of n times per second.
@@ -120,7 +126,8 @@ def main():
         clock.tick(FRAMES_PER_SECOND)
 
         screen.fill("white")
-        candidateList.draw(bestCandidate)
+        for candlist in trialList:
+            candlist.draw()
 
         # Tell pygame to swap its double-buffer (this paints the new frame)
         pg.display.flip()
