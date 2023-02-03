@@ -9,7 +9,7 @@ SCREEN_WIDTH=1200
 SCREEN_HEIGHT=800
 CANDIDATE_RADIUS=15
 FRAMES_PER_SECOND=10
-CANDIDATE_COUNT=10
+CANDIDATE_COUNT= 10
 SAMPLE_SIZE = 3
 #font = pg.font.Font(None, 32)
 pg.font.init()
@@ -58,14 +58,21 @@ class CandidateList:
 
     def bestAS(self):
         #AS stands for after sample 
-        bestId = self.bestSample()
+        bestSample = self.bestSample()
+        bestId = bestSample
+        print('===> Best sample ID=', bestId)
         AScandidates = self.candidate[SAMPLE_SIZE:CANDIDATE_COUNT]
         for candidate in AScandidates:
             e = candidate.id
+            listIndex = self.candidate.index(candidate)
+            print('checking candidate=', e)
+            print('bestId before=', bestId)
             if (e < bestId):
                 bestId = e
-                if e > bestId:
-                    bestId = self.candidate(CANDIDATE_COUNT)
+                return bestId
+            elif listIndex == (CANDIDATE_COUNT - 1):
+                bestId = self.candidate[CANDIDATE_COUNT-1].id
+            print('bestId after=', bestId)
         return bestId
   
     def findCandidate(self, idToFind):
@@ -73,17 +80,20 @@ class CandidateList:
             if c.id == idToFind:
                 return c
 
-    def draw(self):
+    def calculateX(self, c):
+        index = self.candidate.index(c)
+        return 80 + index * 55
+
+    def draw(self, bestCandidate):
         y = 400
-        x = 80
         for cand in self.candidate[0:SAMPLE_SIZE]:
+            x = self.calculateX(cand)
             cand.draw("blue", x, y)
-            x = x + 55
         for cand in self.candidate[SAMPLE_SIZE:CANDIDATE_COUNT]:
+            x = self.calculateX(cand)
             cand.draw("red", x, y)
-            x = x + 55
-        bestCandidateId = self.bestAS()
-        bestCandidate = self.findCandidate(bestCandidateId)
+
+        x = self.calculateX(bestCandidate)
         bestCandidate.draw("green", x, y)
 
 
@@ -100,6 +110,9 @@ def main():
 
     candidateList = CandidateList(screen)
     random.shuffle(candidateList.candidate)
+    bestCandidateId = candidateList.bestAS()
+    bestCandidate = candidateList.findCandidate(bestCandidateId)
+    print('found candidate=', bestCandidate.id)
     
     while not done:
         # This limits the while loop to a max of n times per second.
@@ -107,7 +120,7 @@ def main():
         clock.tick(FRAMES_PER_SECOND)
 
         screen.fill("white")
-        candidateList.draw()
+        candidateList.draw(bestCandidate)
 
         # Tell pygame to swap its double-buffer (this paints the new frame)
         pg.display.flip()
